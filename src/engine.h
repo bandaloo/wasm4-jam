@@ -11,6 +11,12 @@ typedef enum { POS, DRAW, PHYSICS, COLLISION } ComponentType;
 // Core //
 //////////
 
+typedef struct {
+  int width, height, frames;
+  uint32_t flags;
+  const uint8_t *data;
+} Sprite;
+
 /** 2d point */
 typedef struct {
   float x, y;
@@ -48,27 +54,21 @@ void *findComponent(Entity *entity, ComponentType componentType);
 ////////////////
 
 /** POS component */
-typedef struct {
-  Vec2 pos;
-} PosComponentData;
+typedef Vec2 PosComponentData;
 
 Component *makePosComponent(float x, float y);
 
 /** DRAW component requires POS component */
 typedef struct {
-  int width;
-  int height;
-  int numFrames;
-  int currentFrame;
+  Sprite sprite;
   int ticksPerFrame;
+  int currentFrame;
   bool flipX;
   bool flipY;
   int counter;
-  uint8_t *spriteData;
 } DrawComponentData;
 
-Component *makeDrawComponent(int width, int height, int numFrames,
-                             uint8_t *spriteData);
+Component *makeDrawComponent(Sprite sprite, int ticksPerFrame);
 
 /** PHYSICS component requires POS component */
 typedef struct {
@@ -86,5 +86,15 @@ Component *makePhysicsComponent(float vx, float vy, float ax, float ay,
 
 Entity *makePlayer(float x, float y);
 
-// void makeDrawComponent() {
-// }
+/////////////
+// Systems //
+/////////////
+
+void doDrawSystem();
+
+/////////////
+// Helpers //
+/////////////
+
+void blitCenteredSprite(const Sprite sprite, float x, float y,
+                        int currentFrame, uint32_t flags);
